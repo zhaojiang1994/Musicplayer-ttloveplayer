@@ -1,0 +1,31 @@
+{
+  "name": "ttplayer-nanling",
+  "version": "1.0.0",
+  "description": "天天爱听 · 南岭典藏版",
+  "main": "electron.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.nanling.ttplayer",
+    "productName": "天天爱听·南岭典藏",
+    "asar": false,
+    "files": [
+      "electron.js",
+      "preload.js",
+      "mc.html",
+      "css/**/*",
+      "js/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": null
+    }
+  }
+}

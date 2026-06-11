@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>天天爱听 · 南岭典藏版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- 基础样式 -->
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/variables.css">
+    <link rel="stylesheet" href="css/base/layout.css">
+
+    <!-- 组件样式 -->
+    <link rel="stylesheet" href="css/components/topbar.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/playlist.css">
+    <link rel="stylesheet" href="css/components/player.css">
+    <link rel="stylesheet" href="css/components/lyrics.css">
+    <link rel="stylesheet" href="css/components/scrollbar.css">
+    <link rel="stylesheet" href="css/components/folder.css">
+    <!-- 响应式 -->
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- 主题样式（动态加载） -->
+    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
+</head>
+<body>
+<div class="ttplayer-app" id="ttApp">
+    <div class="top-bar" id="titleBar">
+        <div class="logo" id="appLogo">
+            <i class="fas fa-headphones"></i> 天天爱听
+        </div>
+        <div class="theme-actions" id="titleBarRight">
+            <div class="style-switch">
+                <span class="style-label"><i class="fas fa-palette"></i></span>
+                <select id="themeSelect" class="theme-select">
+                    <option value="classic">🎨 经典蓝</option>
+                    <option value="bright">🌞 经典明亮</option>
+                    <option value="dark">🌙 暗夜玻璃</option>
+                    <option value="vintage">🪵 怀旧木纹</option>
+                    <option value="future">💠 未来幻光</option>
+                    <option value="qqmusic">🎵 QQ音乐</option>
+                    <option value="kugou">🎤 酷狗经典</option>
+                    <option value="netease">📻 网易云音乐</option>
+                    <option value="qishui">🥤 汽水音乐</option>
+                    <option value="sunset">🌅 落日余晖</option>
+                    <option value="forest">🌲 森林物语</option>
+                    <option value="cherry">🌸 樱花和风</option>
+                    <option value="ocean">🌊 深海幽蓝</option>
+                    <option value="coffee">☕ 咖啡物语</option>
+                    <option value="silver">🏰 银色城堡</option>
+                    <option value="parchment">📜 古朴乐章</option>
+                    <option value="purple">🔮 炫紫神话</option>
+                    <option value="purple-myth">💎 紫晶神话</option>
+                    <option value="xuanhei">⚫ 炫黑</option>
+                    <option value="yekong">🌃 夜空</option>
+                    <option value="orange">🍊 暖橙</option>
+                    <option value="chonghuizhiai">💕 重回至爱</option>
+                    <option value="ituneswhite">💿 iTunes 永恒白</option>
+                    <option value="yiting">🎵 一听音乐</option>
+                    <option value="qingping">🎋 清萍侠客</option>
+                    <option value="ttplayer-classic">💙 TTPlayer 经典</option>
+                    <option value="ttplayer-dark">⚙️ TTPlayer 暗色</option>
+                    <option value="xp-style">🪟 Windows XP</option>
+                    <option value="win11-style">🪟 Windows 11</option>
+                    <option value="ios-style">🍎 iOS</option>
+                </select>
+            </div>
+            <button id="lyricsProviderBtn" class="clear-cache-title-btn" title="歌词服务器配置" style="margin-right:2px;"><i class="fas fa-microphone"></i></button>
+            <button id="clearCacheBtn" class="clear-cache-title-btn" title="清除所有缓存"><i class="fas fa-trash-alt"></i></button>
+            <div class="window-controls" id="windowControls">
+                <button class="win-btn win-min" id="winMinBtn" title="最小化"><i class="fas fa-minus"></i></button>
+                <button class="win-btn win-max" id="winMaxBtn" title="最大化"><i class="fas fa-window-maximize"></i></button>
+                <button class="win-btn win-close" id="winCloseBtn" title="关闭"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="playlist-panel" id="playlistPanel">
+            <div class="playlist-header">
+                <div class="view-mode">
+                    <button id="viewAllBtn" class="view-mode-btn active"><i class="fas fa-list"></i> 全部歌曲</button>
+                    <button id="viewFolderBtn" class="view-mode-btn"><i class="fas fa-folder-tree"></i> 文件夹</button>
+                    <button id="viewFavBtn" class="view-mode-btn"><i class="fas fa-heart"></i> 收藏</button>
+                    <button id="listFullscreenBtn" class="fullscreen-btn" title="全屏列表"><i class="fas fa-expand"></i></button>
+                </div>
+                <div class="search-area">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索歌曲名 / 歌手...">
+                </div>
+            </div>
+            <div class="list-container" id="listContainer"></div>
+        </div>
+
+        <div class="divider-handle" id="dividerMain" title="拖拽调整区域"></div>
+        <div class="player-core" id="playerCore">
+            <div class="now-playing-card" id="nowPlayingCard">
+                <div class="cover-area">
+                    <div class="spectrum-container">
+                        <canvas id="spectrumCanvas" width="1800" height="1160"></canvas>
+                    </div>
+                    <div class="track-info">
+                        <div class="song-title" id="currentSongTitle">未选择歌曲</div>
+                        <div class="song-artist" id="currentSongArtist">天天爱听 · 静候佳音</div>
+                        <span id="duration" class="duration-num">00:00</span>
+                        <button id="playerFullscreenBtn" class="fullscreen-btn" title="全屏播放器"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="audio-controls">
+                    <button id="prevBtn"><i class="fas fa-backward-step"></i></button>
+                    <button id="playPauseBtn" class="play-big"><i class="fas fa-play"></i></button>
+                    <button id="nextBtn"><i class="fas fa-forward-step"></i></button>
+
+                    <div class="progress-area">
+                        <span id="currentTime">00:00</span>
+                        <div class="progress-slider-wrap">
+                            <input type="range" id="progressBar" value="0" step="0.001" min="0" max="1">
+                        </div>
+                    </div>
+
+                    <div class="volume-box">
+                        <i class="fas fa-volume-down" id="volumeIcon" title="点击静音"></i>
+                        <input type="range" id="volumeCtrl" min="0" max="1" step="0.01" value="0.7">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider-handle divider-h" id="dividerLyrics" title="拖拽调整区域"></div>
+
+            <div class="lyrics-container" id="lyricsContainer">
+                <span class="lyrics-toggle-btn" id="toggleCommentsBtn" title="切换评论显示">论</span>
+                <span class="lyrics-toggle-btn" id="toggleLyricsBtn" title="切换歌词显示">词</span>
+                <div class="lyrics-bg-effect" id="lyricsBgEffect"></div>
+                <div class="lyrics-scroll-wrap">
+                    <div class="lyrics-box" id="lyricsBox">
+                        <div class="lyrics-line-placeholder">✨ 点击播放，歌词同步 ✨</div>
+                    </div>
+                </div>
+                <div class="effect-bar">
+                    <span>背景</span>
+                    <select id="effectSelect">
+                        <!-- 由 manifest.js 动态填充 -->
+                    </select>
+                </div>
+                <div class="font-control">
+                    <span><i class="fas fa-font"></i> 歌词大小</span>
+                    <input type="range" id="fontSlider" min="5" max="40" step="1" value="20">
+                    <span id="fontVal">20px</span>
+                </div>
+                <div class="comments-sort-bar" id="commentsSortBar">
+                    <span class="comments-count" id="commentsCount">0</span><span class="comments-label">条</span>
+                    <button class="comments-sort-btn active" data-sort="hot">热度</button>
+                    <button class="comments-sort-btn" data-sort="new">最新</button>
+                </div>
+                <div class="comments-area" id="commentsArea">
+                    <div class="comment-list" id="commentList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <audio id="audioPlayer" preload="metadata" crossorigin="anonymous"></audio>
+</div>
+
+<!-- ========== UI 模板（从 ui.js 拆分，用于动态渲染） ========== -->
+
+<!-- 文件夹根目录导航栏模板 -->
+<template id="template-folder-nav-root">
+    <div class="folder-navigation-bar">
+        <div class="folder-path-indicator"><i class="fas fa-server"></i> 音乐服务器根目录</div>
+        <div class="clear-cache-btn" id="forceRefreshCache" title="清除缓存并同步">
+            <i class="fas fa-sync-alt"></i> 同步
+        </div>
+        <div class="add-source-btn" id="addSourceBtn" title="添加音乐库">
+            <i class="fas fa-plus"></i> 添加
+        </div>
+    </div>
+</template>
+
+<!-- 文件夹子目录导航栏模板 -->
+<template id="template-folder-nav-sub">
+    <div class="folder-navigation-bar">
+        <div class="folder-item back-item" data-type="back">
+            <i class="fas fa-chevron-left"></i> 返回
+        </div>
+        <div class="folder-path-indicator folder-path-value"></div>
+    </div>
+</template>
+
+<!-- 来源分隔线模板 -->
+<template id="template-source-divider">
+    <div class="source-divider" data-source="">
+        <span class="source-divider-line"></span>
+        <span class="source-divider-label">
+            <i class="fas fa-home"></i>
+            <span class="source-name"></span>
+            <span class="source-date-display"></span>
+        </span>
+        <span class="source-divider-delete" title="删除此来源">
+            <i class="fas fa-trash-alt"></i>
+        </span>
+        <span class="source-divider-line"></span>
+    </div>
+</template>
+
+<!-- 文件夹项模板 -->
+<template id="template-folder-item">
+    <div class="folder-item grid-box" data-type="folder" data-path="">
+        <span class="folder-checkbox"><i class="far fa-square"></i></span>
+        <div class="folder-icon-wrap"><i class="fas fa-folder"></i></div>
+        <div class="folder-name-marquee">
+            <span class="folder-name-scroll"></span>
+        </div>
+    </div>
+</template>
+
+<!-- 歌曲项模板 -->
+<template id="template-song-item">
+    <div class="song-item" data-type="song" data-index="" data-src="">
+        <div class="song-display">
+            <div class="song-index"></div>
+            <span class="fav-icon"><i class="far fa-heart"></i></span>
+            <div class="artist-wrapper">
+                <div class="artist-marquee">
+                    <span class="artist-text"></span>
+                </div>
+            </div>
+            <div class="song-name"></div>
+            <div class="song-duration"></div>
+        </div>
+    </div>
+</template>
+
+<!-- 分页控件模板 -->
+<template id="template-pagination">
+    <div class="pagination-bar">
+        <button class="page-btn" data-page="prev"><i class="fas fa-chevron-left"></i></button>
+        <span class="page-info"></span>
+        <button class="page-btn" data-page="next"><i class="fas fa-chevron-right"></i></button>
+        <div class="page-size-control">
+            <span class="page-size-label">每页</span>
+            <select class="page-size-select">
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+            <span class="page-size-label">条</span>
+        </div>
+    </div>
+</template>
+
+<!-- 空列表模板 -->
+<template id="template-empty-list">
+    <div class="empty-list">
+        <i class="fas fa-music"></i> <span class="empty-message"></span>
+    </div>
+</template>
+
+<script src="./js/app/themeLoader.js"></script>
+<script src="./js/app/player.js"></script>
+<script src="./js/app/lyrics.js"></script>
+<script src="./js/app/musicLibrary.js"></script>
+<script src="./js/app/ui.js"></script>
+<script src="./js/effects/manifest.js"></script>
+<script src="./js/effects/loader.js"></script>
+<script src="./js/effects/fx-plainWhite.js"></script>
+<script src="./js/effects/fx-starField.js"></script>
+<script src="./js/effects/fx-moonlight.js"></script>
+<script src="./js/effects/fx-galaxy.js"></script>
+<script src="./js/effects/fx-solarSystem.js"></script>
+<script src="./js/effects/fx-snow.js"></script>
+<script src="./js/effects/fx-deepSea.js"></script>
+<script src="./js/effects/fx-sakura.js"></script>
+<script src="./js/effects/fx-sunny.js"></script>
+<script src="./js/effects/fx-blackHole.js"></script>
+<script src="./js/effects/fx-auroraSilk.js"></script>
+<script src="./js/effects/fx-quantumMesh.js"></script>
+<script src="./js/effects/fx-themeColor.js"></script>
+<script src="./js/lyrics-providers/request.js"></script>
+<script src="./js/lyrics-providers/provider-base.js"></script>
+<script src="./js/lyrics-providers/provider-manager.js"></script>
+<script src="./js/lyrics-providers/netease.js"></script>
+<script src="./js/lyrics-providers/kugou.js"></script>
+<script src="./js/app/main.js"></script>
+<script src="./js/spectrum/core.js"></script>
+<script src="./js/spectrum/main.js"></script>
+
+<script src="./js/effects/nebula_vortex.js"></script>
+<script src="./js/effects/synthwave_horizon.js"></script>
+<script src="./js/effects/memphis_pop.js"></script>
+<script src="./js/effects/pixel_bounce_race.js"></script>
+</body>
+</html>
